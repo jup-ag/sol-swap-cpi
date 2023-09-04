@@ -4,23 +4,21 @@ import {
   provider,
   wallet,
   program,
-  findAssociatedTokenAddress,
   jupiterProgramId,
   connection,
   getAdressLookupTableAccounts,
+  instructionDataToTransactionInstruction,
 } from "./helper";
 import { TOKEN_PROGRAM_ID, NATIVE_MINT } from "@solana/spl-token";
 import {
   SystemProgram,
   TransactionMessage,
   PublicKey,
-  TransactionInstruction,
   VersionedTransaction,
-  ComputeBudgetProgram,
 } from "@solana/web3.js";
 import fetch from "node-fetch";
 
-const API_ENDPOINT = "https://quote-api.jup.ag/beta";
+const API_ENDPOINT = "https://quote-api.jup.ag/v6";
 
 const getQuote = async (
   fromMint: PublicKey,
@@ -28,23 +26,21 @@ const getQuote = async (
   amount: number
 ) => {
   return fetch(
-    `${API_ENDPOINT}/quote?outputMint=${toMint.toBase58()}&inputMint=${fromMint.toBase58()}&amount=${amount}&slippage=0.5&quoteType=bellman-ford`
+    `${API_ENDPOINT}/quote?outputMint=${toMint.toBase58()}&inputMint=${fromMint.toBase58()}&amount=${amount}&slippage=0.5&onlyDirectRoutes=true`
   ).then((response) => response.json());
 };
 
 const getSwapIx = async (
   user: PublicKey,
-  inputAccount: PublicKey,
   outputAccount: PublicKey,
   quote: any
 ) => {
   const data = {
     quoteResponse: quote,
     userPublicKey: user.toBase58(),
-    sourceTokenAccount: inputAccount.toBase58(),
     destinationTokenAccount: outputAccount.toBase58(),
   };
-  return fetch(`${API_ENDPOINT}/swap-ix`, {
+  return fetch(`${API_ENDPOINT}/swap-instructions`, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -55,15 +51,16 @@ const getSwapIx = async (
 };
 
 const swapToSol = async (
-  swapIntrusction: TransactionInstruction,
-  lookupTableAccounts: string[]
+  computeBudgetPayloads: any[],
+  swapPayload: any,
+  addressLookupTableAddresses: string[]
 ) => {
+  let swapInstruction = instructionDataToTransactionInstruction(swapPayload);
+
   const instructions = [
-    ComputeBudgetProgram.setComputeUnitLimit({
-      units: 1_400_000,
-    }),
+    ...computeBudgetPayloads.map(instructionDataToTransactionInstruction),
     await program.methods
-      .swapToSol(swapIntrusction.data)
+      .swapToSol(swapInstruction.data)
       .accounts({
         programAuthority: programAuthority,
         programWsolAccount: programWSOLAccount,
@@ -73,7 +70,7 @@ const swapToSol = async (
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
       })
-      .remainingAccounts(swapIntrusction.keys)
+      .remainingAccounts(swapInstruction.keys)
       .instruction(),
   ];
 
@@ -81,7 +78,7 @@ const swapToSol = async (
 
   // If you want, you can add more lookup table accounts here
   const addressLookupTableAccounts = await getAdressLookupTableAccounts(
-    lookupTableAccounts
+    addressLookupTableAddresses
   );
   const messageV0 = new TransactionMessage({
     payerKey: wallet.publicKey,
@@ -109,18 +106,8 @@ const swapToSol = async (
   const quote = await getQuote(USDC, SOL, 1000000);
   console.log({ quote });
 
-  const inputAccount = findAssociatedTokenAddress({
-    walletAddress: wallet.publicKey,
-    tokenMintAddress: USDC,
-  });
-
   // Convert the Quote into a Swap instruction
-  const result = await getSwapIx(
-    wallet.publicKey,
-    inputAccount,
-    programWSOLAccount,
-    quote
-  );
+  const result = await getSwapIx(wallet.publicKey, programWSOLAccount, quote);
 
   if ("error" in result) {
     console.log({ result });
@@ -128,17 +115,15 @@ const swapToSol = async (
   }
 
   // We have now both the instruction and the lookup table addresses.
-  const { swapInstruction: swapInstructionPayload, lookupTableAddresses } =
-    result;
-  const swapInstruction = new TransactionInstruction({
-    programId: new PublicKey(swapInstructionPayload.programId),
-    keys: swapInstructionPayload.accounts.map((key) => ({
-      pubkey: new PublicKey(key.pubkey),
-      isSigner: key.isSigner,
-      isWritable: key.isWritable,
-    })),
-    data: Buffer.from(swapInstructionPayload.data, "base64"),
-  });
+  const {
+    computeBudgetInstructions, // The necessary instructions to setup the compute budget.
+    swapInstruction, // The actual swap instruction.
+    addressLookupTableAddresses, // The lookup table addresses that you can use if you are using versioned transaction.
+  } = result;
 
-  await swapToSol(swapInstruction, lookupTableAddresses);
+  await swapToSol(
+    computeBudgetInstructions,
+    swapInstruction,
+    addressLookupTableAddresses
+  );
 })();

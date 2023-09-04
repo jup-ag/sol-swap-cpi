@@ -160,14 +160,6 @@
   resolved "https://registry.npmjs.org/@types/mocha/-/mocha-9.1.1.tgz"
   integrity sha512-Z61JK7DKDtdKTWwLeElSEBcWGRLY8g95ic5FoQqI9CMx0ns/Ghep3B4DfcEimiKMvtamNVULVNKEsiwV3aQmXw==
 
-"@types/node-fetch@^2.6.3":
-  version "2.6.3"
-  resolved "https://registry.npmjs.org/@types/node-fetch/-/node-fetch-2.6.3.tgz"
-  integrity sha512-ETTL1mOEdq/sxUtgtOhKjyB2Irra4cjxksvcMUR5Zr4n+PxVhsCD9WS46oPbHL3et9Zde7CNRr+WUNlcHvsX+w==
-  dependencies:
-    "@types/node" "*"
-    form-data "^3.0.0"
-
 "@types/node@*":
   version "18.16.3"
   resolved "https://registry.npmjs.org/@types/node/-/node-18.16.3.tgz"
@@ -650,15 +642,6 @@ follow-redirects@^1.14.9:
   version "1.15.2"
   resolved "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.2.tgz"
   integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
-
-form-data@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.npmjs.org/form-data/-/form-data-3.0.1.tgz"
-  integrity sha512-RHkBKtLWUVwd7SqRIvCZMEvAMoGUp0XU+seQiZejj0COz3RI3hWP4sCv3gZWWLjJTd7rGwcsF5eKZGii0r/hbg==
-  dependencies:
-    asynckit "^0.4.0"
-    combined-stream "^1.0.8"
-    mime-types "^2.1.12"
 
 form-data@^4.0.0:
   version "4.0.0"

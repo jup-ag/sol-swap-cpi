@@ -21,4 +21,4 @@ startup_wait = 10000
 url = "https://api.mainnet-beta.solana.com"
 
 [[test.validator.clone]]
-address = "JUP5jSkuNHeHLoapB97P7MpckomsS4kLSG1Y31VZoLv"
+address = "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"

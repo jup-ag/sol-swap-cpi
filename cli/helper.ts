@@ -6,6 +6,7 @@ import {
   Keypair,
   Connection,
   AddressLookupTableAccount,
+  TransactionInstruction,
 } from "@solana/web3.js";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import {
@@ -17,7 +18,7 @@ export const programId = new PublicKey(
   "JUPDWNB9G9Hsg8PKynnP6DyWLsXVn4QnqMCqg6n4ZdM"
 );
 export const jupiterProgramId = new PublicKey(
-  "JUP5jSkuNHeHLoapB97P7MpckomsS4kLSG1Y31VZoLv"
+  "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
 );
 export const wallet = new Wallet(
   Keypair.fromSecretKey(bs58.decode(process.env.KEYPAIR))
@@ -79,4 +80,22 @@ export const getAdressLookupTableAccounts = async (
 
     return acc;
   }, new Array<AddressLookupTableAccount>());
+};
+
+export const instructionDataToTransactionInstruction = (
+  instructionPayload: any
+) => {
+  if (instructionPayload === null) {
+    return null;
+  }
+
+  return new TransactionInstruction({
+    programId: new PublicKey(instructionPayload.programId),
+    keys: instructionPayload.accounts.map((key) => ({
+      pubkey: new PublicKey(key.pubkey),
+      isSigner: key.isSigner,
+      isWritable: key.isWritable,
+    })),
+    data: Buffer.from(instructionPayload.data, "base64"),
+  });
 };

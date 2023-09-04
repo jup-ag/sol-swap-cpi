@@ -12,7 +12,7 @@ pub const WSOL_SEED: &[u8] = b"wsol";
 
 mod jupiter {
     use anchor_lang::declare_id;
-    declare_id!("JUP5jSkuNHeHLoapB97P7MpckomsS4kLSG1Y31VZoLv");
+    declare_id!("JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4");
 }
 
 #[derive(Clone)]
