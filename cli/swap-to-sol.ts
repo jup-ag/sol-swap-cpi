@@ -39,6 +39,7 @@ const getSwapIx = async (
     quoteResponse: quote,
     userPublicKey: user.toBase58(),
     destinationTokenAccount: outputAccount.toBase58(),
+    useSharedAccounts: true,
   };
   return fetch(`${API_ENDPOINT}/swap-instructions`, {
     method: "POST",
