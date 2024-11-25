@@ -10,6 +10,14 @@ a wSOL account. On top of that, if the user doesn't have any SOL, we can have an
 This particular implementation has one problem tho. CPI has size limit so it may not work with all routes. For another
 implementation that uses Jupiter Swap without CPI, you can refer to: https://github.com/jup-ag/sol-swap-flash-fill
 
+## Requirements
+
+- Solana: 1.16.21
+- Anchor: 0.27.0
+- Rust: 1.69.0
+
+To build: `anchor build`
+
 ## How this works?
 
 1. Borrow enough SOL from the program to open a wSOL account that the program owns.
